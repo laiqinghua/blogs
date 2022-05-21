@@ -1,0 +1,28 @@
+name: build and push
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: |
+        git clone https://github.com/laiqinghua/blogs.git blogs
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v1
+      with:
+        mdbook-version: '0.4.15'
+
+    - run: |
+        cd blogs
+        mdbook build -d 
