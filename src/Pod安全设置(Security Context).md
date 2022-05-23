@@ -6,4 +6,6 @@
 
 - 可以在集群维度设置PodSecurityPolicy策略会对Pod的SecurityContext安全设置进行校验，对于不满足PodSecurityPolicy策略的Pod，系统将禁止创建。（可以查书第五版本421页）
 
+- tttttt
+
   
