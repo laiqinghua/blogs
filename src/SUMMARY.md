@@ -10,7 +10,9 @@
 ---
 
 - [Istio概念](./Istio1.md)
-- [Istio初体验](./istio2.md)
+- [Istio vs dr](./istio2.md)
+- [Istio gw](./istio2.md)
+- [Istio se](./istio2.md)
 
 # Kunernetes 
 
