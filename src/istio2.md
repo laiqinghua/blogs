@@ -63,7 +63,7 @@ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
 
 - 部署好了之后通过ingress发现访问不了，检查发现istio默认的ingress 类型是LoadBalancer,修改为Nodepro后解决
 
-![image-20220524220427770](/home/lqh/blogs/img/image-20220524220427770.png)
+
 
 通过ingress暴露的NodePort端口和VirtualService 提供的URL路径来进行访问。
 
@@ -109,3 +109,89 @@ istio-ingressgateway   NodePort   10.68.88.230   <none>        15021:32266/TCP,8
   - 描述到达目标的请求怎么处理
 
   
+
+```config
+VirtualService:
+spec:
+  host: #设置目标地址
+  gateways: #匹配设置的网关，如果是服务网格内部的vs则不需要配置该项
+  http: #具体路由匹配规则
+  - match: #满足何种请求来进行路由
+      url:
+      scheme:
+      method:
+      headers:
+      port:
+    route: # 满足了上面的条件后，会被设置的路由路由到何种位置
+      destination: #指定到那个Destination资源，也就是vs和ds绑定的重要点
+      weight: #路由权重
+      headers: #添加头部信息
+  tls: #类似http
+  tcp: #类似http
+  exportTo: #设置可见性，可以设置部分ns可见
+
+DestinationRule:
+  host: #最终路由到的目标地址
+  subsets: #子集主要给服务指定版本、制定一些TrafficPolicy策略
+    name: #dr名字  VS中的destination中的名字对应
+    labels:
+    trafficPolicy: #指定一些策略 
+      loadBalancer:  # 修改负载均衡的负载算法
+      connectionPool:  # 链接池大小
+      outllerDetection: 
+      tls:
+      portLevelSettings:
+  trafficPolicy:
+  exportTo:
+```
+
+- 案例 根据HTTP请求头进行匹配，并按照版本划分请求流量
+  
+  ```yaml
+  apiVersion: networking.istio.io/v1beta1
+  kind: VirtualService
+  spec:
+    gateway:
+    - bookinfo-gateway
+    hosts:
+    - reviews
+    http:
+    - match: # 匹配HTTP头部信息
+      - url:
+      - headers:
+          end-user:
+            regex: lqh
+      route: # 匹配到后转到DR 
+      - destination:
+          host: reviews
+          subset: v2
+    - match:
+      - headers:
+          end-user:
+            regex: qh
+      route: # 按照版本划分比例，比例总和必须要能被100整除
+      - destination:
+          host: reviews
+          subset: v2
+        weight: 70
+      - destination:
+          host: reviews
+          subset: v3
+        weight: 30
+    - route:  #默认路由
+      - destination:
+          host: reviews
+          subset: v1
+   
+  ```
+  
+  
+  
+  
+  
+- 应用场景：
+  
+  1. 按服务版本进行路由：
+  2. 按比例切分流量：
+  3. 根据匹配的规律进行路由：
+  4. 定义各种策略（负载均衡算法、连接池等）：
