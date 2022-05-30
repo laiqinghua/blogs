@@ -11,8 +11,8 @@
 
 - [Istio概念](./Istio1.md)
 - [Istio vs dr](./istio2.md)
-- [Istio gw](./istio2.md)
-- [Istio se](./istio2.md)
+- [Istio gw](./istio3.md)
+- [Istio se](./istio4.md)
 
 # Kunernetes 
 
